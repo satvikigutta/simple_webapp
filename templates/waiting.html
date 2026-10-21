@@ -1,0 +1,23 @@
+{# waiting.html is shown to Player X until Player O joins. #}
+{% extends "base.html" %}
+
+{% block title %}Waiting - Tic-Tac-Toe{% endblock %}
+
+{# This tag tells the browser to reload the page every 2 seconds.
+   That's how Player X finds out Player O has joined, without websockets:
+   once O joins, the reload shows the game page instead of this one.
+   The "url=" part makes sure we reload the game page itself. #}
+{% block head %}
+  <meta http-equiv="refresh" content="2; url={{ url_for('game_page', code=code, token=token) }}">
+{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <p>You are <span class="badge x">X</span></p>
+    <p class="muted">Give this code to your friend so they can join:</p>
+    <p class="code">{{ code }}</p>
+    {# Three dots that pulse while we wait (animated in style.css). #}
+    <p class="dots" aria-hidden="true"><span></span><span></span><span></span></p>
+    <p class="muted">Waiting for Player O to join...</p>
+  </section>
+{% endblock %}

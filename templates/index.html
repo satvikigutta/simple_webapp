@@ -4,6 +4,33 @@
 {% block title %}Home - Tic-Tac-Toe{% endblock %}
 
 {% block content %}
-  <p>Welcome! Play tic-tac-toe against a friend from two different browsers.</p>
-  <p>The game is coming soon.</p>
+  <p class="intro">Play tic-tac-toe against a friend, each on your own phone or computer.</p>
+
+  {# app.py passes "error" when joining fails. If it's set, show it. #}
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <section class="card">
+    <h2>Start a new game</h2>
+    {# Submitting this form sends a POST request to the create_game() route. #}
+    <form action="{{ url_for('create_game') }}" method="post">
+      <button type="submit" class="btn btn-primary">Create game</button>
+    </form>
+  </section>
+
+  <section class="card">
+    <h2>Join a friend's game</h2>
+    {# The text box is named "code", so app.py reads it with request.form["code"].
+       value="..." refills what they typed if joining failed. The "or ''" leaves
+       the box empty on a normal visit, when app.py doesn't pass a code.
+       autocapitalize, autocomplete and spellcheck stop phones from
+       "helpfully" changing the code as you type it. #}
+    <form action="{{ url_for('join_game') }}" method="post">
+      <input type="text" name="code" class="code-input" placeholder="ABCD" maxlength="4"
+             value="{{ code or '' }}" aria-label="Game code"
+             autocapitalize="characters" autocomplete="off" spellcheck="false" required>
+      <button type="submit" class="btn btn-secondary">Join game</button>
+    </form>
+  </section>
 {% endblock %}

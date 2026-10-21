@@ -1,0 +1,14 @@
+{# error.html is the friendly page for errors like 404 (not found) and
+   500 (server problem). The error handlers in app.py fill in the title
+   and message. #}
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Tic-Tac-Toe{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h2>{{ title }}</h2>
+    <p class="muted">{{ message }}</p>
+    <a class="btn btn-primary" href="{{ url_for('home') }}">Back to home</a>
+  </section>
+{% endblock %}

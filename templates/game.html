@@ -1,0 +1,84 @@
+{# game.html shows the board once both players have joined. #}
+{% extends "base.html" %}
+
+{% block title %}Game {{ code }} - Tic-Tac-Toe{% endblock %}
+
+{# Is this player allowed to click a square right now? #}
+{% set my_turn = (turn == player and result is none) %}
+
+{# Load our JavaScript file from the "static" folder. "defer" means it runs
+   after the page has loaded, so the board already exists when it starts. #}
+{% block head %}
+  <script src="{{ url_for('static', filename='game.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+  <section class="card">
+    {# "|lower" turns "X" into "x", to match the class names in style.css. #}
+    <div class="game-info">
+      <span>Game <strong>{{ code }}</strong></span>
+      <span>You are <span class="badge {{ player|lower }}">{{ player }}</span></span>
+    </div>
+
+    {# The running score. game.js updates the numbers as rounds finish. #}
+    <div class="score">
+      <div class="score-box x"><strong id="score-x">{{ score.X }}</strong>X wins</div>
+      <div class="score-box"><strong id="score-draw">{{ score.draw }}</strong>Draws</div>
+      <div class="score-box o"><strong id="score-o">{{ score.O }}</strong>O wins</div>
+    </div>
+
+    {# The status line: who won, a draw, or whose turn it is.
+       game.js updates this text too, using the same messages.
+       The "my-turn" class makes it stand out when it's your move. #}
+    <p class="status{% if my_turn %} my-turn{% endif %}" id="status">
+      {% if result == "draw" %}
+        Draw
+      {% elif result %}
+        {{ result }} wins
+      {% elif my_turn %}
+        Your turn. Tap an empty square.
+      {% else %}
+        Waiting for Player {{ turn }} to move...
+      {% endif %}
+    </p>
+
+    {# A message about a rejected move, like "It's not your turn".
+       game.js hides it once the game moves on. #}
+    {% if error %}
+      <p class="error" id="error">{{ error }}</p>
+    {% endif %}
+
+    {# The whole board is one form. Each square is a button, and clicking one
+       submits the form with name="square" set to that button's number.
+       The data-... attributes pass information to game.js: which player you
+       are, and where to ask for the latest game state. #}
+    <form class="board" id="board" action="{{ url_for('make_move', code=code, token=token) }}" method="post"
+          data-player="{{ player }}"
+          data-state-url="{{ url_for('api_game', code=code) }}">
+      {# loop.index0 counts 0, 1, 2, ... as we go through the 9 squares.
+         Each square gets some classes that style.css uses:
+           "x" or "o"  colors the symbol
+           "win"       highlights the winning line
+           "placed"    plays the pop-in animation on the newest piece #}
+      {% for symbol in board %}
+        <button type="submit" name="square" value="{{ loop.index0 }}"
+                class="square {{ symbol|lower }}
+                       {%- if loop.index0 in winning_line %} win{% endif %}
+                       {%- if loop.index0 == last_move %} placed{% endif %}"
+                aria-label="Square {{ loop.index }}"
+                {% if symbol or not my_turn %}disabled{% endif %}>{{ symbol }}</button>
+      {% endfor %}
+    </form>
+
+    {# Shown only when a round is over. game.js shows or hides it as the game changes. #}
+    <div id="round-over" class="round-over" {% if not result %}hidden{% endif %}>
+      {# Either player can start the next round. The score carries over. #}
+      <form action="{{ url_for('play_again', code=code, token=token) }}" method="post">
+        <button type="submit" class="btn btn-primary">Play again</button>
+      </form>
+      <a href="{{ url_for('home') }}">Back to home</a>
+    </div>
+  </section>
+
+  <p class="hint">Keep this page's URL private: it's what proves you are Player {{ player }}.</p>
+{% endblock %}

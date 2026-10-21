@@ -1,0 +1,458 @@
+/* style.css
+   All the styling for the site. base.html loads this file on every page.
+
+   Sections:
+     1. Colors (CSS variables, with a dark mode)
+     2. Page layout
+     3. Text and links
+     4. Buttons and the code box
+     5. Home page
+     6. Waiting page
+     7. Game page: player info, score, status
+     8. Game page: the board
+     9. Animations
+*/
+
+
+/* ---------- 1. Colors ----------
+   CSS variables (the names starting with --) let us pick each color once
+   and reuse it everywhere with var(--name). To change the theme, change
+   these values. */
+:root {
+  --bg: #f3f4f8;            /* page background */
+  --card: #ffffff;          /* background of the white panels */
+  --text: #1f2333;          /* main text */
+  --muted: #6b7083;         /* less important text */
+  --border: #e2e4ec;        /* thin lines around things */
+
+  --x: #2f6bff;             /* Player X: blue */
+  --x-soft: #e6eeff;        /* light blue background */
+  --o: #ff4d6d;             /* Player O: pink-red */
+  --o-soft: #ffe8ec;        /* light pink background */
+
+  --win: #1fa45b;           /* winning squares: green */
+  --win-soft: #dff7e9;
+  --error: #c62839;
+  --error-soft: #fdecee;
+
+  --square: #f0f2f7;        /* an empty board square */
+  --square-hover: #e4e8f2;
+
+  --radius: 16px;           /* how rounded the corners are */
+  --shadow: 0 4px 20px rgba(20, 25, 50, 0.08);
+}
+
+/* If the phone or computer is set to dark mode, swap in darker colors. */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12141c;
+    --card: #1c1f2b;
+    --text: #eceef5;
+    --muted: #9298ad;
+    --border: #2c3040;
+    --x: #6b95ff;
+    --x-soft: #22305a;
+    --o: #ff6f88;
+    --o-soft: #4a2230;
+    --win: #3ccf7e;
+    --win-soft: #193a29;
+    --error: #ff7b88;
+    --error-soft: #3d1d23;
+    --square: #262a39;
+    --square-hover: #303548;
+    --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  }
+}
+
+
+/* ---------- 2. Page layout ---------- */
+
+/* Make width and height include padding and borders. This makes sizes
+   much easier to reason about. */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* The "hidden" attribute (used by game.js) must always win, even over
+   styles below that set "display". */
+[hidden] {
+  display: none !important;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  /* A column: header at the top, main content, footer at the bottom. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  background: var(--bg);
+  color: var(--text);
+  /* Use each device's own built-in font: San Francisco on iPhone and Mac,
+     Roboto on Android, Segoe UI on Windows. */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 17px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+main {
+  /* Take the full width on a phone, but never more than 440px. */
+  width: 100%;
+  max-width: 440px;
+  flex: 1;  /* fill the space, pushing the footer to the bottom */
+}
+
+/* A white panel with rounded corners and a soft shadow. */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 24px 20px;
+  margin-bottom: 16px;
+}
+
+header {
+  margin-bottom: 20px;
+}
+
+footer {
+  margin-top: 24px;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+
+/* ---------- 3. Text and links ---------- */
+
+.logo {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.logo a {
+  color: var(--text);
+  text-decoration: none;
+}
+
+/* The colored X and O in the site title. */
+.logo .x { color: var(--x); }
+.logo .o { color: var(--o); }
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+}
+
+p {
+  margin: 0 0 12px;
+}
+
+/* Remove the extra space under the last paragraph in a card. */
+.card > :last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--x);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.hint {
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+/* A red message box, used when something goes wrong. */
+.error {
+  background: var(--error-soft);
+  color: var(--error);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.95em;
+}
+
+
+/* ---------- 4. Buttons and the code box ---------- */
+
+.btn {
+  display: inline-block;
+  width: 100%;
+  min-height: 48px;          /* tall enough to tap easily with a thumb */
+  padding: 12px 20px;
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  /* Smoothly animate color and size changes. */
+  transition: background 0.15s, transform 0.1s;
+}
+
+/* Shrink slightly while being pressed, so taps feel responsive. */
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--x);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+.btn-secondary {
+  background: var(--square);
+  color: var(--text);
+}
+
+.btn-secondary:hover {
+  background: var(--square-hover);
+}
+
+/* The text box where you type a game code. */
+.code-input {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 14px;
+  margin-bottom: 10px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--text);
+  /* At least 16px, or iPhones zoom in when you tap the box. */
+  font: inherit;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: 0.3em;
+  text-align: center;
+  text-transform: uppercase;   /* show letters as capitals while typing */
+}
+
+/* Keep the placeholder ("ABCD") in normal spacing and a softer color. */
+.code-input::placeholder {
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+/* A clear outline when the box is selected. */
+.code-input:focus {
+  outline: none;
+  border-color: var(--x);
+}
+
+
+/* ---------- 5. Home page ---------- */
+
+.intro {
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+
+
+/* ---------- 6. Waiting page ---------- */
+
+/* The big game code to share with your friend. */
+.code {
+  margin: 8px 0 16px;
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: 0.25em;
+  /* letter-spacing adds space after the last letter too, so shift it back. */
+  padding-left: 0.25em;
+  color: var(--x);
+}
+
+/* Three dots that pulse one after another while you wait. */
+.dots span {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin: 0 4px;
+  border-radius: 50%;
+  background: var(--muted);
+  animation: pulse 1.2s infinite ease-in-out;
+}
+
+/* Start each dot a little later than the one before. */
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+
+/* ---------- 7. Game page: player info, score, status ---------- */
+
+/* "Game ABCD" on the left, "You are X" on the right. */
+.game-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  color: var(--muted);
+  font-size: 0.9em;
+}
+
+/* A small colored label showing a player's symbol. */
+.badge {
+  display: inline-block;
+  min-width: 28px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  font-weight: 800;
+}
+
+.badge.x { background: var(--x-soft); color: var(--x); }
+.badge.o { background: var(--o-soft); color: var(--o); }
+
+/* The score: three boxes side by side. */
+.score {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.score-box {
+  background: var(--square);
+  border-radius: 12px;
+  padding: 8px 4px;
+  font-size: 0.8em;
+  color: var(--muted);
+}
+
+/* The big number inside each score box. */
+.score-box strong {
+  display: block;
+  font-size: 1.6rem;
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.score-box.x strong { color: var(--x); }
+.score-box.o strong { color: var(--o); }
+
+/* "Your turn", "X wins", and so on. */
+.status {
+  min-height: 1.5em;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+/* Make it stand out when it's your turn. */
+.status.my-turn {
+  color: var(--x);
+}
+
+
+/* ---------- 8. Game page: the board ---------- */
+
+.board {
+  display: grid;
+  /* 3 equal columns that share the available width. */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  /* As wide as the card allows, up to 360px. */
+  width: 100%;
+  max-width: 360px;
+  margin: 16px auto;
+}
+
+.square {
+  /* Always a perfect square, however wide the column is. */
+  aspect-ratio: 1 / 1;
+  border: none;
+  border-radius: 14px;
+  background: var(--square);
+  color: var(--text);
+  font: inherit;
+  /* The X or O scales with the screen: between 2.5rem and 4rem. */
+  font-size: clamp(2.5rem, 14vw, 4rem);
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  /* Stops a double-tap from zooming the page on phones. */
+  touch-action: manipulation;
+  /* Removes the gray flash some phones show when you tap. */
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s, transform 0.1s;
+}
+
+/* Empty squares you can play in react when you point at or press them. */
+.square:enabled:hover {
+  background: var(--square-hover);
+}
+
+.square:enabled:active {
+  transform: scale(0.95);
+}
+
+.square:disabled {
+  cursor: default;
+}
+
+/* The colors for each symbol. */
+.square.x { color: var(--x); }
+.square.o { color: var(--o); }
+
+/* The three squares that won the round. */
+.square.win {
+  background: var(--win-soft);
+  box-shadow: inset 0 0 0 3px var(--win);
+  animation: win-pulse 0.6s ease-out;
+}
+
+/* The bottom area when a round is over. */
+.round-over .btn {
+  margin-bottom: 12px;
+}
+
+
+/* ---------- 9. Animations ----------
+   @keyframes describes how something changes over time. An element plays
+   the animation when it gets a class that uses it. */
+
+/* A newly placed piece pops in: it starts small and see-through, grows a
+   little too big, then settles at its normal size. */
+.square.placed {
+  animation: pop-in 0.25s ease-out;
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0.3); opacity: 0; }
+  70%  { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+/* The winning squares grow briefly. */
+@keyframes win-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+/* The waiting dots fade and grow. */
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50%      { opacity: 1;   transform: scale(1); }
+}
+
+/* Some people turn on "reduce motion" in their phone or computer settings
+   because animations bother them. Respect that by switching animations off. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
