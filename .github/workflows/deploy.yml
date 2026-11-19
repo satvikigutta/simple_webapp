@@ -1,0 +1,48 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install -r requirements.txt pytest
+      - name: Run tests
+        run: pytest -v
+
+  deploy:
+    needs: test   # only runs if the tests pass
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+
+      # --max-instances 1: games live in memory, so there must be exactly one copy of the app.
+      - name: Deploy
+        run: >
+          gcloud run deploy tictactoe
+          --source .
+          --region us-west1
+          --project ${{ secrets.GCP_PROJECT_ID }}
+          --allow-unauthenticated
+          --max-instances 1
+          --quiet
+
+      - name: Show service URL
+        run: |
+          echo "App is live at:"
+          gcloud run services describe tictactoe --region us-west1 --project ${{ secrets.GCP_PROJECT_ID }} --format='value(status.url)'
